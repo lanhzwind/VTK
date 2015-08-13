@@ -649,7 +649,7 @@ HDremove_all(const char *fname)
 #define _W32_FT_OFFSET (116444736000000000ULL)
 
 int
-Wgettimeofday(struct timeval *tv, struct timezone *tz)
+VTKH5gettimeofday(struct timeval *tv, struct timezone *tz)
  {
   union {
     unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
@@ -686,7 +686,7 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
 static char Wlogin_buffer[WloginBuffer_count];
 
 char*
-Wgetlogin()
+VTKH5getlogin()
 {
 
 #ifdef H5_HAVE_WINSOCK2_H

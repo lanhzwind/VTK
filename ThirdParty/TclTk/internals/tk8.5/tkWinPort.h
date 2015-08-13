@@ -123,10 +123,12 @@
  * Define timezone for gettimeofday.
  */
 
+#ifndef __MINGW32__ 
 struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
 };
+#endif
 
 /*
  * Disabled inclusion of Tcl's private header in hope of discovering we
