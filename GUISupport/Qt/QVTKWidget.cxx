@@ -232,7 +232,7 @@ void QVTKWidget::SetRenderWindow(vtkRenderWindow* w)
     this->mRenWin->SetWindowId( reinterpret_cast<void*>(this->winId()));
 
     // tell the vtk window what the size of this window is
-    this->mRenWin->vtkRenderWindow::SetSize(this->width(), this->height());
+    this->mRenWin->vtkRenderWindow::SetSize(this->width()*this->devicePixelRatio(), this->height()*this->devicePixelRatio());
     this->mRenWin->vtkRenderWindow::SetPosition(this->x(), this->y());
 
     // have VTK start this window and create the necessary graphics resources
@@ -259,7 +259,7 @@ void QVTKWidget::SetRenderWindow(vtkRenderWindow* w)
       }
 
     // tell the interactor the size of this window
-    this->mRenWin->GetInteractor()->SetSize(this->width(), this->height());
+    this->mRenWin->GetInteractor()->SetSize(this->width()*this->devicePixelRatio(), this->height()*this->devicePixelRatio());
 
     // Add an observer to monitor when the image changes.  Should work most
     // of the time.  The application will have to call
@@ -317,14 +317,14 @@ void QVTKWidget::saveImageToCache()
     return;
     }
 
-  int w = this->width();
-  int h = this->height();
+  int w = this->width()*this->devicePixelRatio();
+  int h = this->height()*this->devicePixelRatio();
   this->mCachedImage->SetExtent(0, w-1, 0, h-1, 0, 0);
   this->mCachedImage->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
   vtkUnsignedCharArray* array = vtkUnsignedCharArray::SafeDownCast(
     this->mCachedImage->GetPointData()->GetScalars());
   // We use back-buffer if
-  this->mRenWin->GetPixelData(0, 0, this->width()-1, this->height()-1,
+  this->mRenWin->GetPixelData(0, 0, w-1, h-1,
     this->mRenWin->GetDoubleBuffer()? 0 /*back*/ : 1 /*front*/, array);
   this->cachedImageCleanFlag = true;
   emit cachedImageClean();
@@ -427,7 +427,7 @@ void QVTKWidget::resizeEvent(QResizeEvent* e)
   // Don't set size on subclass of vtkRenderWindow or it triggers recursion.
   // Getting this event in the first place means the window was already
   // resized and we're updating the sizes in VTK.
-  this->mRenWin->vtkRenderWindow::SetSize(this->width(), this->height());
+  this->mRenWin->vtkRenderWindow::SetSize(this->width()*this->devicePixelRatio(), this->height()*this->devicePixelRatio());
 
   // and update the interactor
   if(this->mRenWin->GetInteractor())
@@ -481,8 +481,8 @@ void QVTKWidget::paintEvent(QPaintEvent* )
   QPaintDevice* device = QPainter::redirected(this);
   if(device != NULL && device != this)
     {
-    int w = this->width();
-    int h = this->height();
+    int w = this->width()*this->devicePixelRatio();
+    int h = this->height()*this->devicePixelRatio();
     QImage img(w, h, QImage::Format_RGB32);
     vtkUnsignedCharArray* pixels = vtkUnsignedCharArray::New();
     pixels->SetArray(img.bits(), w*h*4, 1);
@@ -751,7 +751,7 @@ void QVTKWidget::x11_setup_window()
   XWindowAttributes a;
   XGetWindowAttributes(display, this->winId(), &a);
 
-  Window win = XCreateWindow(display, p, a.x, a.y, a.width, a.height,
+  Window win = XCreateWindow(display, p, a.x, a.y, a.width*this->devicePixelRatio(), a.height*this->devicePixelRatio(),
                              0, vi->depth, InputOutput, vi->visual,
                              CWBackPixel|CWBorderPixel|CWColormap, &attrib);
 
@@ -861,7 +861,7 @@ bool QVTKWidget::paintCachedImage()
     vtkUnsignedCharArray* array = vtkUnsignedCharArray::SafeDownCast(
       this->mCachedImage->GetPointData()->GetScalars());
     // put cached image into back buffer if we can
-    this->mRenWin->SetPixelData(0, 0, this->width()-1, this->height()-1,
+    this->mRenWin->SetPixelData(0, 0, this->width()*this->devicePixelRatio()-1, this->height()*this->devicePixelRatio()-1,
                                 array, !this->mRenWin->GetDoubleBuffer());
     // swap buffers, if double buffering
     this->mRenWin->Frame();

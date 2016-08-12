@@ -1,2 +1,4 @@
 # Do not add ExternalData module staging files
 .ExternalData*
+
+*.DS_Store
